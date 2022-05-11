@@ -7,3 +7,9 @@ variable "resource_group_location" {
   default       = "centralus"
   description   = "Location of the resource group."
 }
+variable "db_type" {
+  default = "MongoDB"
+}
+variable "network_cidr" {
+  default = "10.0.1.0/24"
+}
