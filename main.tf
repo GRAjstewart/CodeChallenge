@@ -18,3 +18,11 @@ module "network" {
  rg_name = azurerm_resource_group.rg.name 
  rg_location = var.resource_group_location
 }
+
+module "linux_vm" {
+source = "./modules/azure_vm"
+rg_name = azurerm_resource_group.rg.name 
+rg_location = var.resource_group_location
+nic = [module.network.nic]
+public_key_openssh = tls_private_key.public_key_openssh.public_key_openssh
+}
