@@ -7,7 +7,20 @@ variables:
   tfvarsFile: dev.tfvars
 pool:
   vmImage: 'ubuntu-latest'
+
+trigger:
+- main
+
 steps:
+#PARAMETER VALIDATION
+- script: |
+    set +e
+    if [ -z $(environment) ]; then
+    echo "target environment not specified";
+    exit 1;
+    fi
+    echo "environment is:" $(environment)
+displayName: 'Verify that the environment parameter has been supplied to pipeline'
 #KEY VAULT TASK
 - task: AzureKeyVault@1
   inputs:
@@ -34,7 +47,7 @@ steps:
     terraform init -backend-config="storage_account_name=$(tfBackendStorageAccountName)" -backend-config="container_name=$(tfBackendStorageContainerName)" -backend-config="access_key=$(tf-backend-sa-access-key)" -backend-config="key=$(tfBackendFileName)"
 # TERRAFORM PLAN    
     echo '#######Terraform Plan########'
-    terraform plan -var="client_id=$(tf-sp-id)" -var="client_secret=$(tf-sp-secret)" -var="tenant_id=$(tf-tenant-id)" -var="subscription_id=$(tf-subscription-id)" -var="aks_sp_id=$(aks-sp-id)" -var="aks_sp_secret=$(aks-sp-secret)" -out="out.plan"
+    terraform plan -var-file=./tf-vars/$(tfvarsFile) -var="client_id=$(tf-sp-id)" -var="client_secret=$(tf-sp-secret)" -var="tenant_id=$(tf-tenant-id)" -var="subscription_id=$(tf-subscription-id)" -var="aks_sp_id=$(aks-sp-id)" -var="aks_sp_secret=$(aks-sp-secret)" -out="out.plan"
 # TERRAFORM APPLY    
     echo '#######Terraform Apply########'
     terraform apply out.plan
