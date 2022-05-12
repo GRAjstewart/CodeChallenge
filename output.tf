@@ -1,3 +1,7 @@
+output "tls_private_key" {
+  value     = tls_private_key.public_key_openssh.private_key_pem
+  sensitive = true
+}
 
 output "cosmos_connection_string" {
   value = module.cosmos_db.connection_strings

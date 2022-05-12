@@ -36,3 +36,20 @@ module "cosmos_db" {
     subnet_id = module.network.subnet_id
 
 }
+
+resource "azurerm_virtual_machine_extension" "vmext" {
+    resource_group_name     = azurerm_resource_group.rg.name 
+    
+    name                    = "${module.linux_vm.hostname}-vmext"
+
+    virtual_machine_name = "${module.linux_vm.hostname}"
+    publisher            = "Microsoft.Azure.Extensions"
+    type                 = "CustomScript"
+    type_handler_version = "2.0"
+
+    protected_settings = <<PROT
+    {
+        "script": "${base64encode(file("./scritps/vm_setup.sh"))}"
+    }
+    PROT
+}
