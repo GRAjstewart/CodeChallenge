@@ -1,19 +1,42 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-trigger:
-- main
-
+variables:
+  environment: dev
+  InfraProvisioningResoureGroupName: dev-provisioning-rg
+  tfBackendStorageAccountName: grajseterraformbackendsa
+  tfBackendStorageContainerName: terraform-backend-files
+  tfBackendFileName: dev-tf-state-file
+  tfvarsFile: dev.tfvars
 pool:
-  vmImage: ubuntu-latest
-
+  vmImage: 'ubuntu-latest'
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
+#KEY VAULT TASK
+- task: AzureKeyVault@1
+  inputs:
+    azureSubscription: '$(environment)-sp'
+    KeyVaultName: 'grajse-secrets-kv'
+    SecretsFilter: 'tf-sp-id,tf-sp-secret,tf-tenant-id,tf-subscription-id,tf-backend-sa-access-key,aks-sp-id,aks-sp-secret'
+  displayName: 'Get key vault secrets as pipeline variables'
+# INSTALLING REQUIRED VERSION OF 
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+  displayName: 'Install Terraform 0.12.3'
+# AZURE CLI TASK
+- task: AzureCLI@1
+  inputs:
+    azureSubscription: '$(environment)-sp'
+    scriptLocation: 'inlineScript'
+    inlineScript: 'terraform version'
+  displayName: "Terraform Version"
+# AZ LOGIN USING TERRAFORM SERVICE PRINCIPAL
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    az login --service-principal -u $(tf-sp-id) -p $(tf-sp-secret) --tenant $(tf-tenant-id)
+    cd $(System.DefaultWorkingDirectory)/tf-infra-provision
+# TERRAFORM INIT    
+    echo '#######Terraform Init########'
+    terraform init -backend-config="storage_account_name=$(tfBackendStorageAccountName)" -backend-config="container_name=$(tfBackendStorageContainerName)" -backend-config="access_key=$(tf-backend-sa-access-key)" -backend-config="key=$(tfBackendFileName)"
+# TERRAFORM PLAN    
+    echo '#######Terraform Plan########'
+    terraform plan -var="client_id=$(tf-sp-id)" -var="client_secret=$(tf-sp-secret)" -var="tenant_id=$(tf-tenant-id)" -var="subscription_id=$(tf-subscription-id)" -var="aks_sp_id=$(aks-sp-id)" -var="aks_sp_secret=$(aks-sp-secret)" -out="out.plan"
+# TERRAFORM APPLY    
+    echo '#######Terraform Apply########'
+    terraform apply out.plan
+    
+  displayName: 'Terraform Init, Plan and Apply '
