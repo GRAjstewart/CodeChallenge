@@ -17,7 +17,7 @@ steps:
   inputs:
     azureSubscription: '$(environment)-sp'
     KeyVaultName: 'grajse-secrets-kv'
-    SecretsFilter: 'tf-sp-id,tf-sp-secret,tf-tenant-id,tf-subscription-id,tf-backend-sa-access-key,aks-sp-id,aks-sp-secret'
+    SecretsFilter: 'tf-sp-id,tf-sp-secret,tf-tenant-id,tf-subscription-id,tf-backend-sa-access-key'
   displayName: 'Get key vault secrets as pipeline variables'
 # INSTALLING REQUIRED VERSION OF 
 - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
