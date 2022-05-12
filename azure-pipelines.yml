@@ -13,6 +13,7 @@ trigger:
 
 
 steps:
+
 - task: AzureKeyVault@2
   inputs:
     azureSubscription: 'Azure subscription 1(1)(962d8d24-6eb4-48c2-896d-3bf1d254bcdf)'
@@ -22,22 +23,14 @@ steps:
 # INSTALLING REQUIRED VERSION OF 
 - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
   displayName: 'Install Terraform 0.12.3'
-# AZURE CLI TASK
-- task: AzureCLI@1
-  inputs:
-    azureSubscription: '$(environment)-sp'
-    scriptLocation: 'inlineScript'
-    inlineScript: 'terraform version'
-  displayName: "Terraform Version"
 # AZ LOGIN USING TERRAFORM SERVICE PRINCIPAL
 - task: Bash@3
   inputs:
     targetType: 'inline'
     script: |
       az login --service-principal -u $(tf-sp-id) -p $(tf-sp-secret) --tenant $(tf-tenant-id)
-        cd $(System.DefaultWorkingDirectory)/tf-infra-provision
-        terraform init -backend-config="storage_account_name=$(tfBackendStorageAccountName)" -backend-config="container_name=$(tfBackendStorageContainerName)" -backend-config="access_key=$(tf-backend-sa-access-key)" -backend-config="key=$(tfBackendFileName)"
-        terraform plan -var-file=./tf-vars/$(tfvarsFile) -var="client_id=$(tf-sp-id)" -var="client_secret=$(tf-sp-secret)" -var="tenant_id=$(tf-tenant-id)" -var="subscription_id=$(tf-subscription-id)" -var="aks_sp_id=$(aks-sp-id)" -var="aks_sp_secret=$(aks-sp-secret)" -out="out.plan"
-        terraform apply out.plan
+      terraform init -backend-config="storage_account_name=$(tfBackendStorageAccountName)" -backend-config="container_name=$(tfBackendStorageContainerName)" -backend-config="access_key=$(tf-backend-sa-access-key)" -backend-config="key=$(tfBackendFileName)"
+      terraform plan -var-file=./tf-vars/$(tfvarsFile) -var="client_id=$(tf-sp-id)" -var="client_secret=$(tf-sp-secret)" -var="tenant_id=$(tf-tenant-id)" -var="subscription_id=$(tf-subscription-id)" -var="aks_sp_id=$(aks-sp-id)" -var="aks_sp_secret=$(aks-sp-secret)" -out="out.plan"
+      terraform apply out.plan
 
 
