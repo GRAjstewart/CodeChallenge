@@ -30,7 +30,7 @@ steps:
     script: |
       az login --service-principal -u $(tf-sp-id) -p $(tf-sp-secret) --tenant $(tf-tenant-id)
       terraform init -backend-config="storage_account_name=$(tfBackendStorageAccountName)" -backend-config="container_name=$(tfBackendStorageContainerName)" -backend-config="access_key=$(tf-backend-sa-access-key)" -backend-config="key=$(tfBackendFileName)"
-      terraform plan -var-file=./tf-vars/$(tfvarsFile) -var="client_id=$(tf-sp-id)" -var="client_secret=$(tf-sp-secret)" -var="tenant_id=$(tf-tenant-id)" -var="subscription_id=$(tf-subscription-id)" -var="aks_sp_id=$(aks-sp-id)" -var="aks_sp_secret=$(aks-sp-secret)" -out="out.plan"
+      terraform plan -var="client_id=$(tf-sp-id)" -var="client_secret=$(tf-sp-secret)" -var="tenant_id=$(tf-tenant-id)" -var="subscription_id=$(tf-subscription-id)"  -out="out.plan"
       terraform apply out.plan
 
 
