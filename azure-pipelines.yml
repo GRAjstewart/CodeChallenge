@@ -11,14 +11,14 @@ pool:
 trigger:
 - main
 
+
 steps:
-#KEY VAULT TASK
-- task: AzureKeyVault@1
+- task: AzureKeyVault@2
   inputs:
-    azureSubscription: '$(environment)-sp'
+    azureSubscription: 'Azure subscription 1(962d8d24-6eb4-48c2-896d-3bf1d254bcdf)'
     KeyVaultName: 'grajse-secrets-kv'
-    SecretsFilter: 'tf-sp-id,tf-sp-secret,tf-tenant-id,tf-subscription-id,tf-backend-sa-access-key'
-  displayName: 'Get key vault secrets as pipeline variables'
+    SecretsFilter: '*'
+    RunAsPreJob: true
 # INSTALLING REQUIRED VERSION OF 
 - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
   displayName: 'Install Terraform 0.12.3'
