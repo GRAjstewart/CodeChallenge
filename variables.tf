@@ -13,3 +13,18 @@ variable "db_type" {
 variable "network_cidr" {
   default = "10.0.1.0/24"
 }
+variable "subscription_id" {
+  description = "Azure subscription ID"
+}
+
+variable "client_id" {
+  description = "Azure Service Principal id (client id)"
+}
+
+variable "client_secret" {
+  description = "Azure client Service Principal secret (client secret)"
+}
+
+variable "tenant_id" {
+  description = "Azure tenant or directory id"
+}
